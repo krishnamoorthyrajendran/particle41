@@ -15,7 +15,7 @@ terraform {
 
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "simple-time-service-terraform-state"
+  bucket = "simple-time-service
   
   lifecycle {
     prevent_destroy = true
@@ -31,7 +31,7 @@ resource "aws_s3_bucket_versioning" "state_versioning" {
 
 
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "simple-time-service-terraform-locks"
+  name         = "simple-time-service"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
@@ -44,7 +44,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
 terraform {
   backend "s3" {
-    bucket         = "simple-time-service-terraform-state"
+    bucket         = "simple-time-service"
     key            = "terraform.tfstate"
     region         = "ap-south-1"
     encrypt        = true
