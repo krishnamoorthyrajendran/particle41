@@ -5,9 +5,7 @@ on:
     branches: [ main ]
 permissions:
   contents: write
-env:
-  AWS_REGION: "ap-south-1"
-  DOCKER_IMAGE_NAME: "krishnamoorthy1/particle41"
+
 
 jobs:
   build-and-push:
@@ -34,20 +32,20 @@ jobs:
       id: docker_build
       run: |
         TAG=${GITHUB_SHA::7}
-        docker build -t ${{ env.DOCKER_IMAGE_NAME }}:$TAG -f app/Dockerfile app/
-        docker push ${{ env.DOCKER_IMAGE_NAME }}:$TAG
+        docker build -t ${{ secrets.DOCKER_REPO }}:$TAG -f app/Dockerfile app/
+        docker push ${{ secrets.DOCKER_REPO }}:$TAG
         echo "image_tag=$TAG" >> $GITHUB_OUTPUT
 
     - name: Update Terraform variables
       run: |
         TAG=${{ steps.docker_build.outputs.image_tag }}
-        sed -i "s|container_image *=.*|container_image = \"${{ env.DOCKER_IMAGE_NAME }}:$TAG\"|" terraform/terraform.tfvars
-        sed -i "s|region *=.*|region = \"${{ env.AWS_REGION }}\"|" terraform/terraform.tfvars
+        sed -i "s|container_image *=.*|container_image = \"${{ secrets.DOCKER_REPO }}:$TAG\"|" terraform/terraform.tfvars
+        sed -i "s|region *=.*|region = \"${{ secrets.AWS_REGION }}\"|" terraform/terraform.tfvars
 
     - name: Commit and push changes
       run: |
         git config --global user.name "${{ secrets.GIT_USER_NAME }}"
         git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
         git add terraform/terraform.tfvars
-        git commit -m "Update container_image to ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.docker_build.outputs.image_tag }}"
+        git commit -m "Update container_image to ${{ secrets.DOCKER_REPO }}:${{ steps.docker_build.outputs.image_tag }}"
         git push
