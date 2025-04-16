@@ -40,6 +40,15 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "simple-time-service-terraform-state"  # Must match EXACT string from aws_s3_bucket.terraform_state.bucket
+    key            = "terraform.tfstate"
+    region         = "ap-south-1"
+    encrypt        = true
+    dynamodb_table = "simple-time-service-terraform-locks"  # Must match EXACT string from aws_dynamodb_table.terraform_locks.name
+  }
+}
 # VPC Module
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
