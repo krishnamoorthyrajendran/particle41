@@ -14,44 +14,7 @@ terraform {
 }
 
 
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "simple-time-service
-  
-  lifecycle {
-    prevent_destroy = true
-  }
-}
 
-resource "aws_s3_bucket_versioning" "state_versioning" {
-  bucket = aws_s3_bucket.terraform_state.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-
-resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "simple-time-service"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-}
-
-
-terraform {
-  backend "s3" {
-    bucket         = "simple-time-service"
-    key            = "terraform.tfstate"
-    region         = "ap-south-1"
-    encrypt        = true
-    use_lockfile   = false 
-    
-  }
-}
 # VPC Module
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
