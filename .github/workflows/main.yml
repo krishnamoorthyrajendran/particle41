@@ -3,7 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-
+permissions:
+  contents: write
 env:
   AWS_REGION: "ap-south-1"
   DOCKER_IMAGE_NAME: "krishnamoorthy1/particle41"
