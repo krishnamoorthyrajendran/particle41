@@ -14,13 +14,14 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    environment: DOCKERHUB_USERNAME
+    environment: production
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        token: ${{ secrets.DOCKERHUB_TOKEN }}
+        fetch-depth: 0  # Needed for proper git diff
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -39,31 +40,29 @@ jobs:
         echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
     - name: Update container image in terraform.tfvars
-  run: |
-    # Debug: Show file before changes
-    echo "Before modification:"
-    cat terraform/terraform.tfvars
-    
-    # More precise sed command that handles spaces around =
-    sed -i "s|^container_image[[:space:]]*=[[:space:]]*\".*\"|container_image = \"${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}\"|" terraform/terraform.tfvars
-    
-    # Debug: Show file after changes
-    echo "After modification:"
-    cat terraform/terraform.tfvars
-    git diff
+      run: |
+        echo "Current container_image value:"
+        grep "container_image" terraform/terraform.tfvars
+        
+        echo "Updating to ${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}"
+        sed -i.bak -E "s/^(container_image[[:space:]]*=[[:space:]]*).*/\1\"${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}\"/" terraform/terraform.tfvars
+        
+        echo "Updated file content:"
+        cat terraform/terraform.tfvars
 
-- name: Commit changes if modified
-  run: |
-    # Only proceed if file was actually changed
-    if git diff --quiet terraform/terraform.tfvars; then
-      echo "No changes detected in terraform.tfvars"
-    else
-      git config --global user.name "GitHub Actions"
-      git config --global user.email "actions@github.com"
-      git add terraform/terraform.tfvars
-      git commit -m "CI: Update container_image to ${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}"
-      git push
-    fi
+    - name: Commit changes if modified
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+        if ! git diff --exit-code terraform/terraform.tfvars; then
+          git add terraform/terraform.tfvars
+          git commit -m "CI: Update container_image to ${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }} [skip ci]"
+          git push
+        else
+          echo "No changes to terraform.tfvars - skipping commit"
+        fi
+
   terraform-deploy:
     name: Terraform Plan and Apply
     runs-on: ubuntu-latest
