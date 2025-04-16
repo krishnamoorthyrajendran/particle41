@@ -40,6 +40,9 @@ jobs:
 
     - name: Update Terraform variables
       run: |
+        # Verify file exists and content before modification
+        ls -la terraform/terraform.tfvars
+        cat terraform/terraform.tfvars
         sed -i "s|container_image = \".*\"|container_image = \"${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}\"|g" terraform/terraform.tfvars
 
     - name: Commit updated Terraform files
