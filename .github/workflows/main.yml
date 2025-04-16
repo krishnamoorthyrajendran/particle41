@@ -4,15 +4,23 @@ on:
   push:
     branches: [ main ]
 
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  APP_NAME: ${{ secrets.APP_NAME }}
+  DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+
 jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    environment: DOCKERHUB_USERNAME 
+    environment: production
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GIT_TOKEN }}
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -20,11 +28,56 @@ jobs:
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}  # ✅ match your secret name
-        password: ${{ secrets.DOCKERHUB_TOKEN }}     # ✅ match your secret name
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and Push Docker image
       run: |
         TAG=${GITHUB_SHA::7}
-        docker build -t krishnamoorthy1/particle41:$TAG -f app/Dockerfile app/
-        docker push krishnamoorthy1/particle41:$TAG
+        docker build -t ${{ env.DOCKER_REPO }}:$TAG -f app/Dockerfile app/
+        docker push ${{ env.DOCKER_REPO }}:$TAG
+        echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+    - name: Update Terraform variables
+      run: |
+        sed -i "s|container_image = \".*\"|container_image = \"${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}\"|g" terraform/terraform.tfvars
+
+    - name: Commit updated Terraform files
+      run: |
+        git config --global user.name "${{ secrets.GIT_USER_NAME }}"
+        git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+        git add terraform/terraform.tfvars terraform/variables.tf
+        git commit -m "CI: Update container_image to ${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}"
+        git push
+
+  terraform-deploy:
+    name: Terraform Plan and Apply
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform Init
+      working-directory: ./terraform
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: ./terraform
+      run: terraform plan
+
+    - name: Terraform Apply
+      working-directory: ./terraform
+      run: terraform apply -auto-approve
