@@ -13,6 +13,7 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
+
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "simple-time-service-terraform-state"
   
@@ -40,13 +41,15 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+
 terraform {
   backend "s3" {
-    bucket         = "simple-time-service-terraform-state"  # Must match EXACT string from aws_s3_bucket.terraform_state.bucket
+    bucket         = "simple-time-service-terraform-state"
     key            = "terraform.tfstate"
     region         = "ap-south-1"
     encrypt        = true
-    dynamodb_table = "simple-time-service-terraform-locks"  # Must match EXACT string from aws_dynamodb_table.terraform_locks.name
+    use_lockfile   = false 
+    
   }
 }
 # VPC Module
