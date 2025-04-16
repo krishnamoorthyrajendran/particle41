@@ -18,7 +18,8 @@ terraform {
     bucket         = "simple-time-service-terraform-state"
     key            = "terraform.tfstate"
     region         = "ap-south-1"
-    dynamodb_table = "simple-time-service-terraform-locks"
+   
+    dynamodb_table = "simple-time-service-terraform-locks"  # Keep this for now
   }
 }
 # VPC Module
