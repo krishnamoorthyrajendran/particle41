@@ -26,5 +26,5 @@ jobs:
     - name: Build and Push Docker image
       run: |
         TAG=${GITHUB_SHA::7}
-        docker build -t krishnamoorthy1/particle41:$TAG .
+        docker build -t krishnamoorthy1/particle41:$TAG -f app/Dockerfile app/
         docker push krishnamoorthy1/particle41:$TAG
