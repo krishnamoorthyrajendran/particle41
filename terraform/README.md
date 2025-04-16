@@ -35,27 +35,25 @@ Authenticate with AWS using one of these methods:
 2. **AWS CLI profile**:
    ```bash
    # Configure your AWS CLI profile if not already set up
-   aws configure --profile my-profile
+   aws configure 
    
-   # Tell Terraform to use this profile
-   export AWS_PROFILE="my-profile"
-   ```
+   
 
 3. **AWS IAM roles** (recommended for production):
-   - If running in an AWS environment (EC2, CodeBuild), use IAM roles
-   - For GitHub Actions, use OIDC federation
+   - If running in an AWS environment  use IAM roles
+  
 
 ## Deployment Instructions
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/simpletimeservice-infrastructure.git
-   cd simpletimeservice-infrastructure/terraform
+   git clone https://github.com/krishnamoorthyrajendran/particle41
+   cd terraform
    ```
 
 2. Update the `terraform.tfvars` file with your specific values:
-   - Set `container_image` to your Docker Hub image
-   - Adjust region, subnets, or instance sizes as needed
+   - Automatcally change the container_image 
+  
 
 3. Initialize Terraform to download the required modules:
    ```bash
@@ -72,30 +70,12 @@ Authenticate with AWS using one of these methods:
    terraform apply
    ```
 
-6. When the deployment completes, the output will show the URL to access your application.
-
-## Modules Used
-
-This infrastructure uses popular community modules from the Terraform Registry:
-
-- [terraform-aws-modules/vpc/aws](https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest) - For creating the VPC, subnets, NAT gateways, and route tables
-- [terraform-aws-modules/alb/aws](https://registry.terraform.io/modules/terraform-aws-modules/alb/aws/latest) - For setting up the Application Load Balancer
-- [terraform-aws-modules/ecs/aws](https://registry.terraform.io/modules/terraform-aws-modules/ecs/aws/latest) - For creating the ECS cluster
-- [terraform-aws-modules/iam/aws](https://registry.terraform.io/modules/terraform-aws-modules/iam/aws/latest) - For creating IAM roles and policies
-
 ## Cleanup
 
 To destroy all resources created by Terraform:
 ```bash
 terraform destroy
 ```
-
-## Customization
-
-- Edit `terraform.tfvars` to customize deployment parameters
-- Modify `variables.tf` to add additional configuration options
-- Update ECS task definition in `main.tf` to change container settings
-
 ## Security Considerations
 
 - All ECS tasks run in private subnets
