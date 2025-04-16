@@ -38,21 +38,32 @@ jobs:
         docker push ${{ env.DOCKER_REPO }}:$TAG
         echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
-    - name: Update Terraform variables
-      run: |
-        # Verify file exists and content before modification
-        ls -la terraform/terraform.tfvars
-        cat terraform/terraform.tfvars
-        sed -i "s|container_image = \".*\"|container_image = \"${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}\"|g" terraform/terraform.tfvars
+    - name: Update container image in terraform.tfvars
+  run: |
+    # Debug: Show file before changes
+    echo "Before modification:"
+    cat terraform/terraform.tfvars
+    
+    # More precise sed command that handles spaces around =
+    sed -i "s|^container_image[[:space:]]*=[[:space:]]*\".*\"|container_image = \"${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}\"|" terraform/terraform.tfvars
+    
+    # Debug: Show file after changes
+    echo "After modification:"
+    cat terraform/terraform.tfvars
+    git diff
 
-    - name: Commit updated Terraform files
-      run: |
-        git config --global user.name "${{ secrets.GIT_USER_NAME }}"
-        git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
-        git add terraform/terraform.tfvars 
-        git commit -m "CI: Update container_image to ${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}"
-        git push
-
+- name: Commit changes if modified
+  run: |
+    # Only proceed if file was actually changed
+    if git diff --quiet terraform/terraform.tfvars; then
+      echo "No changes detected in terraform.tfvars"
+    else
+      git config --global user.name "GitHub Actions"
+      git config --global user.email "actions@github.com"
+      git add terraform/terraform.tfvars
+      git commit -m "CI: Update container_image to ${{ env.DOCKER_REPO }}:${{ env.IMAGE_TAG }}"
+      git push
+    fi
   terraform-deploy:
     name: Terraform Plan and Apply
     runs-on: ubuntu-latest
