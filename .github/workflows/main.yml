@@ -38,7 +38,5 @@ jobs:
     - name: Update Terraform variables
       run: |
         TAG=${{ steps.docker_build.outputs.image_tag }}
-        sed -i "s|container_image = \".*\"|container_image = \"${{ env.DOCKER_IMAGE_NAME }}:$TAG\"|" terraform/terraform.ifvars
-        sed -i "s|region = \".*\"|region = \"${{ env.AWS_REGION }}\"|" terraform/terraform.ifvars
-
- 
+        sed -i "s|container_image *=.*|container_image = \"${{ env.DOCKER_IMAGE_NAME }}:$TAG\"|" terraform/terraform.tfvars
+        sed -i "s|region *=.*|region = \"${{ env.AWS_REGION }}\"|" terraform/terraform.tfvars
