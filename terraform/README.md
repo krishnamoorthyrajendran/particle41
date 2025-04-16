@@ -45,9 +45,9 @@ Authenticate with AWS using one of these methods:
 
 ## Deployment Instructions
 
-1. Clone this repository:
+1. Git repository:
    ```bash
-   git clone https://github.com/krishnamoorthyrajendran/particle41
+   https://github.com/krishnamoorthyrajendran/particle41 
    cd terraform
    ```
 
@@ -70,12 +70,6 @@ Authenticate with AWS using one of these methods:
    terraform apply
    ```
 
-## Cleanup
-
-To destroy all resources created by Terraform:
-```bash
-terraform destroy
-```
 ## Security Considerations
 
 - All ECS tasks run in private subnets
