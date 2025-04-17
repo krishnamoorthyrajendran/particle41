@@ -14,7 +14,7 @@ terraform {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "test-bucket-pratcle-new-1"  # Replace with a unique bucket name
+  bucket = "test-bucket-pratcle-new"  # Replace with a unique bucket name
   region = "ap-south-1"
   versioning {
     enabled = true
@@ -52,7 +52,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
 terraform {
   backend "s3" {
-    bucket         = "test-bucket-pratcle-new-1"
+    bucket         = "test-bucket-pratcle-new"
     key            = "global/s3/terraform.tfstate"
     region         = "ap-south-1"
     use_lockfile   = true
