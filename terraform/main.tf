@@ -15,22 +15,23 @@ terraform {
 
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "test-bucket-pratcle-new"  # Replace with a unique bucket name
-  region = "ap-south-1"
   versioning {
     enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
   }
 
   tags = {
     Name        = "Terraform State Bucket"
     Environment = "Dev"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_encryption" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
@@ -52,7 +53,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
 terraform {
   backend "s3" {
-    bucket         = "test-bucket-pratcle-new"  # Replace with your bucket name
+    bucket         = "test-bucket-pratcle-new"  
     key            = "global/s3/terraform.tfstate"
     region         = "ap-south-1"  # Replace with your region
     dynamodb_table = "terraform-locks-1"
