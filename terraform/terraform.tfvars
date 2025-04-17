@@ -6,11 +6,7 @@ public_subnet_cidrs       = ["10.0.1.0/24", "10.0.2.0/24"]
 private_subnet_cidrs      = ["10.0.3.0/24", "10.0.4.0/24"]
 app_name                  = "simpletimeservice"
 app_port                  = 3000
-<<<<<<< Updated upstream
-container_image = "krishnamoorthy1/particle41:53b9844"
-=======
 container_image           = ""
->>>>>>> Stashed changes
 ecs_task_cpu              = 256
 ecs_task_memory           = 512
 desired_count             = 1
