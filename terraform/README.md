@@ -41,6 +41,8 @@ Authenticate with AWS using one of these methods:
 
 3. **AWS IAM roles** (recommended for production):
    - If running in an AWS environment  use IAM roles
+
+4 . **Create s3 bucket and dynamo db** 
   
 
 ## Deployment Instructions
